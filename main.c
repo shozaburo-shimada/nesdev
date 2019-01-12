@@ -23,10 +23,25 @@ THE SOFTWARE.
 */
 
 #include <stdio.h>
-#include <sys/stat.h>
+#include <stdlib.h> //malloc()
+#include <sys/stat.h> //stat()
+#include <string.h> //strcmp()
+
+const unsigned char MAGIC[] = {0x4e, 0x45, 0x53, 0x1a};
+
+struct Header {
+  unsigned char magic_number[4]; //4E, 45, 53, 1A
+  unsigned char prg_size; //Size of program ROM
+  unsigned char chr_size; //Size of character ROM
+  unsigned char flag_6;
+  unsigned char flag_7;
+  unsigned char flag_8;
+  unsigned char flag_9;
+  unsigned char flag_10;
+  unsigned char reserved[5];
+};
 
 int main(){
-  printf("NES\n");
 
   FILE *fp;
   //int fd;
@@ -35,13 +50,6 @@ int main(){
   struct stat stbuf;
 
   char filename[] = "sample1.nes";
-  //fd = open(filename, O_RDONLY);
-  /*
-  if(fd == -1){
-    printf("ERROR: open()");
-    return -1;
-  }
-  */
 
   fp = fopen(filename, "rb");
   if(fp == NULL){
@@ -51,13 +59,6 @@ int main(){
     printf("%s is opened\n", filename);
   }
 
-  /*
-  if(fstat(fd, &stbuf) == -1){
-    printf("ERROR: fstat()\n");
-    return -1;
-  }
-  */
- 
   if(stat(filename, &stbuf) != 0){
     printf("ERROR: stat()\n");
     return -1;
@@ -66,8 +67,23 @@ int main(){
   file_size = stbuf.st_size;
   printf("File size is %ld bytes\n", file_size);
 
-  //fclose(fp);
+  struct Header *header;
+  header = (struct Header*)malloc(sizeof(struct Header));
 
+  //Parse header of nes file
 
+  fread(header, sizeof(unsigned char), 16, fp);
+
+  printf("Magic Number: %x, %x, %x %x \n", header->magic_number[0], header->magic_number[1], header->magic_number[2], header->magic_number[3]);  
+
+  if(memcmp(MAGIC, header->magic_number, sizeof(unsigned char) * 4) != 0){
+    printf("This file is wrong format\n");
+  }
+
+  printf("Program ROM size: %d x 16KB \n", header->prg_size);
+  printf("Character ROM size: %d x 8KB \n", header->chr_size);
+  
+  free(header);
+  fclose(fp);
   return 0;
 }
