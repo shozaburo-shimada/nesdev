@@ -24,9 +24,10 @@ THE SOFTWARE.
 
 #include <stdio.h>
 #include <sys/stat.h>
+#include "Cpu.h"
 
 int main(){
-  printf("NES\n");
+  printf("NES start!\n");
 
   FILE *fp;
   //int fd;
@@ -35,13 +36,6 @@ int main(){
   struct stat stbuf;
 
   char filename[] = "sample1.nes";
-  //fd = open(filename, O_RDONLY);
-  /*
-  if(fd == -1){
-    printf("ERROR: open()");
-    return -1;
-  }
-  */
 
   fp = fopen(filename, "rb");
   if(fp == NULL){
@@ -51,23 +45,23 @@ int main(){
     printf("%s is opened\n", filename);
   }
 
-  /*
-  if(fstat(fd, &stbuf) == -1){
-    printf("ERROR: fstat()\n");
-    return -1;
-  }
-  */
- 
   if(stat(filename, &stbuf) != 0){
     printf("ERROR: stat()\n");
     return -1;
   }
 
+  //Read Header
+  unsigned char header[16];
+  fread(header, 1, sizeof(header), fp);
+
   file_size = stbuf.st_size;
   printf("File size is %ld bytes\n", file_size);
 
-  //fclose(fp);
+  fclose(fp);
 
+  Cpu cpu = Cpu();
+  //uint8_t sts = cpu.getStatusReg();
+  //printf("sts: %d \n", sts);
 
   return 0;
 }
