@@ -11,13 +11,13 @@ typedef struct status_registers{
   uint8_t negative:1;     //bit7
 }status_registers_t;
 
-typedef struct registers{
+typedef struct cpu_registers{
   uint8_t A;    //Accumlator
   uint8_t X;    //Index Register
   uint8_t Y;    //Index Register
   
   union {
-    uint8_t sts_8;
+    uint8_t sts_byte;
     status_registers_t sts_bits;
   }P;    //Status Regster
   
@@ -25,7 +25,7 @@ typedef struct registers{
 
   uint16_t SP;  //Stack Pointer
   uint16_t PC;  //Program Counter
-}registers_t;
+}cpu_registers_t;
 
 
 
@@ -34,4 +34,6 @@ class Cpu{
     Cpu();
     void run();
     uint8_t getStatusReg();
+  private:
+    void init();
 };

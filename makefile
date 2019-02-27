@@ -1,5 +1,5 @@
 PROGRAM = nes
-OBJS = main.o Cpu.o
+OBJS = main.o Cpu.o Cassette.o
 CC = gcc
 CFLAGS =
 LDFLAGS =
