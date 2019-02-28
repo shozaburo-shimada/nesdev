@@ -33,7 +33,10 @@ class Cpu{
   public:
     Cpu();
     void run();
+    void fetch();
     uint8_t getStatusReg();
+    uint16_t getProgramCounter();
+    void setProgramCounter(uint16_t);
   private:
     void init();
 };

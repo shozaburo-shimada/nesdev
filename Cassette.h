@@ -17,5 +17,5 @@ struct Header {
 class Cassette{
   public:
     Cassette();
-    uint8_t init();
+    uint8_t init(); 
 };

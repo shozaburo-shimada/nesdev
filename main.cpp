@@ -23,18 +23,75 @@ THE SOFTWARE.
 */
 
 #include <stdio.h>
+#include <pthread.h>
+#include <unistd.h> //pause()
 
 #include "Cpu.h"
 #include "Cassette.h"
 
+Cassette rom = Cassette();
+Cpu cpu = Cpu();
+
+int running;
+
+void cpu_process(){
+  printf("cpu_process()\n");
+  //Fetch
+  uint16_t pc = cpu.getProgramCounter();
+  printf("\tprogram counter: %d\n", pc);
+  cpu.setProgramCounter(++pc);
+  cpu.fetch();
+  //Process
+}
+
+void gpu_process(){
+  printf("gpu_process()\n");
+}
+
+
+
+void *cpu_clock(void *param){
+  while(running){
+    usleep(1000000);
+    cpu_process();
+  }
+  return NULL;
+}
+
+void *gpu_clock(void *param){
+  while(running){
+    usleep(500000);
+    gpu_process();
+  }
+  return NULL;
+}
+
 int main(){
   printf("\n");
 
-  Cassette rom = Cassette();
-  rom.init();
 
-  Cpu cpu = Cpu();
+  pthread_t cpu_tid, gpu_tid;
+
+  //Init Objects
+  rom.init();
   cpu.run();
+
+  //Init thread
+  running = 1;
+  if(pthread_create(&cpu_tid, NULL, cpu_clock, NULL) != 0){
+    perror("ERROR: cpu, pthread_create()\n");
+    return -1;
+  }
+  if(pthread_create(&gpu_tid, NULL, gpu_clock, NULL) != 0){
+    perror("ERROR: gpu, pthread_create()\n");
+    return -1;
+  }
+
+  while(getchar() != 'q');
+  running = 0;
+  pthread_join(cpu_tid, NULL);
+
+  //while(1);
 
   printf("\n");
   return 0;
