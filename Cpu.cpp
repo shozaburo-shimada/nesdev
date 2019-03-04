@@ -29,8 +29,8 @@ void Cpu::run(){
 
 }
 
-void Cpu::fetch(){
-
+uint8_t Cpu::fetch(Cassette *rom){
+  rom->getData(cpu_reg.PC);
 }
 
 uint8_t Cpu::getStatusReg(){
@@ -42,7 +42,7 @@ uint16_t Cpu::getProgramCounter(){
 }
 
 void Cpu::setProgramCounter(uint16_t pc){
-  printf("\t set pc: %d\n", pc);
+  printf("\tset pc: %d\n", pc);
   cpu_reg.PC = pc; 
 }
 

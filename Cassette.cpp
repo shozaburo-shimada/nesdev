@@ -5,10 +5,24 @@
 #include <string.h> //strcmp()
 #include <stdio.h>
 
+struct Header *header;
+uint8_t *prg_rom;
+uint8_t *chr_rom;
+uint8_t trainer[512];
+
 Cassette::Cassette(){
-
-
+  printf("Create Cassette Instance\n");
 }
+
+Cassette::~Cassette(){
+  printf("Delete Cassette Instance\n");
+
+  free(prg_rom);
+  free(chr_rom);
+  free(header);
+}
+
+
 
 uint8_t Cassette::init(){
   printf("Cassette::init()\n");
@@ -37,7 +51,7 @@ uint8_t Cassette::init(){
   file_size = stbuf.st_size;
   printf("\tFile size is %ld bytes\n", file_size);
 
-  struct Header *header;
+
   header = (struct Header*)malloc(sizeof(struct Header));
 
   //Parse header of nes file
@@ -52,10 +66,28 @@ uint8_t Cassette::init(){
 
   printf("\tProgram ROM size: %d x 16KB \n", header->prg_size);
   printf("\tCharacter ROM size: %d x 8KB \n", header->chr_size);
-  
-  free(header);
+  printf("\tFlag 6: %d \n", header->flag6.bytes);
+  printf("\tFlag 7: %d \n", header->flag7);
+  printf("\tFlag 8: %d \n", header->flag8);
+  printf("\tFlag 9: %d \n", header->flag9);
+  printf("\tFlag 10: %d \n", header->flag10);
+
+  prg_rom = (uint8_t *)malloc(header->prg_size * 16 * 1024);
+  chr_rom = (uint8_t *)malloc(header->chr_size * 8 * 1024);
+
+  if(header->flag6.bits.trainer){
+    fread(trainer, sizeof(uint8_t), sizeof(trainer), fp);
+  }
+
+  fread(prg_rom, sizeof(uint8_t), header->prg_size * 16 * 1024, fp);
+  fread(chr_rom, sizeof(uint8_t), header->chr_size * 8 * 1024, fp);
+
   fclose(fp);
-  
   return 0;
 
+}
+
+
+uint8_t Cassette::getData(uint16_t pc){
+  return prg_rom[pc];
 }

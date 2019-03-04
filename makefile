@@ -4,7 +4,7 @@ CC = gcc
 CFLAGS =
 LDFLAGS =
 #LIBS = -lrt
-LIBS = -pthread
+LIBS = -pthread -lstdc++
 
 #nes: main.o Cpu.o
 #	$(CC) -o nes main.o Cpu.o

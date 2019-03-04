@@ -39,8 +39,9 @@ void cpu_process(){
   //Fetch
   uint16_t pc = cpu.getProgramCounter();
   printf("\tprogram counter: %d\n", pc);
-  cpu.setProgramCounter(++pc);
-  cpu.fetch();
+  cpu.setProgramCounter(pc + 1);
+  uint8_t data = cpu.fetch(&rom);
+  printf("\tprg rom, add: %d, data: %d \n", pc, data);
   //Process
 }
 

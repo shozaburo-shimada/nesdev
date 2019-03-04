@@ -1,4 +1,8 @@
+#ifndef H_CPU
+#define H_CPU
+
 #include <stdint.h>
+#include "Cassette.h"
 
 typedef struct status_registers{
   uint8_t carry:1;        //bit0
@@ -33,10 +37,12 @@ class Cpu{
   public:
     Cpu();
     void run();
-    void fetch();
+    uint8_t fetch(Cassette*);
     uint8_t getStatusReg();
     uint16_t getProgramCounter();
     void setProgramCounter(uint16_t);
   private:
     void init();
 };
+
+#endif
