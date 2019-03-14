@@ -30,19 +30,13 @@ THE SOFTWARE.
 #include "Cassette.h"
 
 Cassette rom = Cassette();
-Cpu cpu = Cpu();
+Cpu cpu = Cpu(&rom);
 
 int running;
 
 void cpu_process(){
   printf("cpu_process()\n");
-  //Fetch
-  uint16_t pc = cpu.getProgramCounter();
-  printf("\tprogram counter: %d\n", pc);
-  cpu.setProgramCounter(pc + 1);
-  uint8_t data = cpu.fetch(&rom);
-  printf("\tprg rom, add: %d, data: %d \n", pc, data);
-  //Process
+  cpu.run();
 }
 
 void gpu_process(){

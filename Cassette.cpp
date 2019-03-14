@@ -89,5 +89,6 @@ uint8_t Cassette::init(){
 
 
 uint8_t Cassette::getData(uint16_t pc){
+  printf("Cassette::getData()\n");
   return prg_rom[pc];
 }
