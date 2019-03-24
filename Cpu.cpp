@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "Cpu.h"
+#include "Instruction.h"
 
 typedef struct status_registers{
   uint8_t carry:1;        //bit0
@@ -27,69 +28,6 @@ typedef struct cpu_registers{
   uint16_t SP;  //Stack Pointer
   uint16_t PC;  //Program Counter
 }cpu_registers_t;
-
-enum Addressing{
-  NA_ADDRESSING = 0,
-  IMPLIED,
-  ACCUMULATOR,
-  IMMEDIATE,
-  ZERO_PAGE,
-  ZERO_PAGE_X,
-  XERO_PAGE_Y,
-  RELATIVE,
-  ABSOLUTE,
-  ABSOLUTE_X,
-  ABSOLUTE_Y,
-  INDIRECT,
-  INDIRECT_X,
-  INDIRECT_Y
-};
-
-enum BaseName{
-  NA_BASE_NAME = 0,
-  //Load
-  LDA, LDX, LDY,  
-  //Store
-  STA, STX, TAX, TAY, TSX, TXA, TXS, TYA,
-  //Calculation
-  ADC, AND, ASL, BIT, CMP, CPX, CPY, DEC, DEX, DEY, EOR, INC, INX, INY, LSR, ORA, ROL, ROR, SBC,
-  //Stack
-  PHA, PHP, PLP, 
-  //Jump
-  JMP, JSR, RTS, RTI,
-  //Branch
-  BCC, BCS, BEQ, BMI, BNE, BPL, BVC, BVS,
-  //Flag
-  CLC, CLD, CLI, CLV, SEC, SED, SEI,
-  //Other
-  BRK, NOP
-};
-
-typedef struct opecode_list{
-  BaseName base;
-  Addressing add;
-  uint8_t cycles;
-}opecode_list_t;
-
-opecode_list_t ope_list[]={
-  {BRK, IMPLIED, 2}, //0x00
-  {ORA, INDIRECT_X, 1}, //0x01
-  {NA_BASE_NAME, NA_ADDRESSING, 0}, //0x02
-  {NA_BASE_NAME, NA_ADDRESSING, 0}, //0x03
-  {NA_BASE_NAME, NA_ADDRESSING, 0}, //0x04
-  {ORA, ZERO_PAGE, 2}, //0x05
-  {ASL, ZERO_PAGE, 2}, //0x06
-  {NA_BASE_NAME, NA_ADDRESSING, 0}, //0x07
-  {PHP, IMPLIED, 2}, //0x08
-  {ORA, IMMEDIATE, 2}, //0x09
-  {ASL, ACCUMULATOR, 1}, //0x0A
-  {NA_BASE_NAME, NA_ADDRESSING, 0}, //0x0B
-  {NA_BASE_NAME, NA_ADDRESSING, 0}, //0x0C
-  {ORA, ABSOLUTE, 1}, //0x0D
-  {ASL, ABSOLUTE, 2}, //0x0E
-  {NA_BASE_NAME, NA_ADDRESSING, 0}, //0x0F
-  {NA_BASE_NAME, NA_ADDRESSING, 0}
-};
 
 static cpu_registers_t cpu_reg;
 
@@ -124,21 +62,24 @@ void Cpu::init(){
 uint8_t Cpu::run(){
   uint8_t cycle = 0;
   printf("Cpu::run()\n");
-  printf("Opecode add: %d, Cycle: %d \n", ope_list[0].add, ope_list[0].cycles);
-  printf("Opecode add: %d, Cycle: %d \n", ope_list[1].add, ope_list[1].cycles);
 
   //Fetch Opecode from program rom
   printf("\tprogram counter: %d \n", cpu_reg.PC);
   uint8_t opecode = this->fetch();
-  printf("\topecode: %d \n", opecode);
 
-  uint8_t basename = 0;
-  uint8_t mode = 0;
+  uint8_t basename = ope_list[opecode].base;
+  uint8_t addressing = ope_list[opecode].add;
+  uint8_t cyc = ope_list[opecode].cycles;
+
+  printf("\topecode: 0x%x, base: %d, addressing: %d, cycle: %d \n", opecode, basename, addressing, cyc);
+
   //Fetch Opeland
-  uint8_t opeland = this->fetchOpeland(mode);
+  uint8_t opeland;
+  this->fetchOpeland(addressing, &opeland);
+
 
   //Execute
-  this->exec(basename, opeland, mode);
+  this->exec(basename, opeland, addressing);
 
   return cycle;
 }
@@ -148,11 +89,46 @@ uint8_t Cpu::fetch(){
   this->rom->getData(cpu_reg.PC++);
 }
 
-uint8_t Cpu::fetchOpeland(uint8_t addressing){
+void Cpu::fetchOpeland(uint8_t addressing, uint8_t *opl){
   printf("Cpu::fetchOpeland()\n");
-  uint8_t opeland = 0;
+  
+  switch(addressing){
+    case IMPLIED:
+      opl = NULL;
+      break;
+    case ACCUMULATOR:
+      opl = NULL;
+      break;
+    case IMMEDIATE:
+      *opl = this->fetch();
+      break;
+    case ZERO_PAGE:
+      *opl = this->fetch();
+      break;
+    case ZERO_PAGE_X:
+      *opl = this->fetch() + cpu_reg.X;
+      break;
+    case ZERO_PAGE_Y:
+      *opl = this->fetch() + cpu_reg.Y;
+      break;
+    case RELATIVE:
+      break;
+    case ABSOLUTE:
+      break;
+    case ABSOLUTE_X:
+      break;
+    case ABSOLUTE_Y:
+      break;
+    case INDIRECT:
+      break;
+    case INDIRECT_X:
+      break;
+    case INDIRECT_Y:
+      break;
+    default:
+      break; 
 
-  return opeland;
+  }
 }
 
 void Cpu::exec(uint8_t basename, uint8_t opeland, uint8_t mode){
@@ -171,4 +147,3 @@ void Cpu::setProgramCounter(uint16_t pc){
   printf("\tset pc: %d\n", pc);
   cpu_reg.PC = pc; 
 }
-
