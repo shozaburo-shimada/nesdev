@@ -67,16 +67,20 @@ uint8_t Cpu::run(){
   printf("\tprogram counter: %d \n", cpu_reg.PC);
   uint8_t opecode = this->fetch();
 
-  uint8_t basename = ope_list[opecode].base;
-  uint8_t addressing = ope_list[opecode].add;
+  BaseName basename = ope_list[opecode].base;
+  Addressing addressing = ope_list[opecode].add;
   uint8_t cyc = ope_list[opecode].cycles;
 
   printf("\topecode: 0x%x, base: %d, addressing: %d, cycle: %d \n", opecode, basename, addressing, cyc);
 
   //Fetch Opeland
-  uint8_t opeland;
+  uint16_t opeland;
   this->fetchOpeland(addressing, &opeland);
-
+  if(&opeland == NULL){
+    printf("\topeland: NULL \n");
+  }else{
+    printf("\topeland: 0x%x \n", opeland);
+  }
 
   //Execute
   this->exec(basename, opeland, addressing);
@@ -89,15 +93,18 @@ uint8_t Cpu::fetch(){
   this->rom->getData(cpu_reg.PC++);
 }
 
-void Cpu::fetchOpeland(uint8_t addressing, uint8_t *opl){
+void Cpu::fetchOpeland(uint8_t addressing, uint16_t *opl){
   printf("Cpu::fetchOpeland()\n");
   
+  uint8_t baseaddr;
+
   switch(addressing){
     case IMPLIED:
-      opl = NULL;
+      printf("\tIMPLIED \n");
+      *opl = 0;
       break;
     case ACCUMULATOR:
-      opl = NULL;
+      *opl = 0;
       break;
     case IMMEDIATE:
       *opl = this->fetch();
@@ -106,24 +113,43 @@ void Cpu::fetchOpeland(uint8_t addressing, uint8_t *opl){
       *opl = this->fetch();
       break;
     case ZERO_PAGE_X:
-      *opl = this->fetch() + cpu_reg.X;
+      *opl = 0x00FF & (this->fetch() + cpu_reg.X);
       break;
     case ZERO_PAGE_Y:
-      *opl = this->fetch() + cpu_reg.Y;
+      *opl = 0x00FF & (this->fetch() + cpu_reg.Y);
       break;
     case RELATIVE:
+      baseaddr = this->fetch();
+      if(baseaddr < 0x80){
+        *opl = baseaddr + this->fetch();
+      }else{
+        *opl = baseaddr + this->fetch() - 256;
+      }
       break;
     case ABSOLUTE:
+      baseaddr = this->fetch();
+      *opl = this->fetch() << 8 | baseaddr;
       break;
     case ABSOLUTE_X:
+      baseaddr = this->fetch();
+      *opl = this->fetch() << 8 | baseaddr;
+      *opl = 0xFFFF & (*opl + cpu_reg.X);
       break;
     case ABSOLUTE_Y:
+      baseaddr = this->fetch();
+      *opl = this->fetch() << 8 | baseaddr;
+      *opl = 0xFFFF & (*opl + cpu_reg.Y);
       break;
     case INDIRECT:
+
       break;
     case INDIRECT_X:
+      baseaddr = 0xFF & (this->fetch() + cpu_reg.X);
+      *opl = this->fetch() << 8 | baseaddr;
       break;
     case INDIRECT_Y:
+      baseaddr = this->fetch();
+      *opl = 0xFFFF & ((this->fetch() << 8 | baseaddr) + cpu_reg.Y);
       break;
     default:
       break; 
