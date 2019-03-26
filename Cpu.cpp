@@ -90,7 +90,13 @@ uint8_t Cpu::run(){
 
 uint8_t Cpu::fetch(){
   printf("Cpu::fetch()\n");
-  this->rom->getData(cpu_reg.PC++);
+  //this->rom->getData(cpu_reg.PC++);
+  return this->read(cpu_reg.PC++);
+}
+
+uint8_t Cpu::read(uint16_t address){
+  printf("CPU::read()\n");
+  return this->rom->getData(address);
 }
 
 void Cpu::fetchOpeland(uint8_t addressing, uint16_t *opl){
@@ -157,8 +163,129 @@ void Cpu::fetchOpeland(uint8_t addressing, uint16_t *opl){
   }
 }
 
-void Cpu::exec(uint8_t basename, uint8_t opeland, uint8_t mode){
+void Cpu::exec(uint8_t basename, uint16_t opeland, uint8_t mode){
   printf("Cpu::exec()\n");
+  switch(basename){
+    case LDA:
+      break;
+    case LDX:
+      printf("\tLDX\n");
+      cpu_reg.X = this->read(opeland);
+      break;
+    case LDY:
+      break;
+    case STA:
+      break;
+    case STX:
+      break;
+    case STY:
+      break;
+    case TAX:
+      break;
+    case TAY:
+      break;
+    case TSX:
+      break;
+    case TXA:
+      break;
+    case TXS:
+      break;
+    case TYA:
+      break;
+    case ADC:
+      break;
+    case AND:
+      break;
+    case ASL:
+      break;
+    case BIT:
+      break;
+    case CMP:
+      break;
+    case CPX:
+      break;
+    case CPY:
+      break;
+    case DEC:
+      break;
+    case DEX:
+      break;
+    case DEY:
+      break;
+    case EOR:
+      break;
+    case INC:
+      break;
+    case INX:
+      break;
+    case INY:
+      break;
+    case LSR:
+      break;
+    case ORA:
+      break;
+    case ROL:
+      break;
+    case ROR:
+      break;
+    case SBC:
+      break;
+    case PHA:
+      break;
+    case PHP:
+      break;
+    case PLA:
+      break;
+    case PLP:
+      break;
+    case JMP:
+      break;
+    case JSR:
+      break;
+    case RTS:
+      break;
+    case RTI:
+      break;
+    case BCC:
+      break;
+    case BCS:
+      break;
+    case BEQ:
+      break;
+    case BMI:
+      break;
+    case BNE:
+      break;
+    case BPL:
+      break;
+    case BVC:
+      break;
+    case BVS:
+      break;
+    case CLC:
+      break;
+    case CLD:
+      break;
+    case CLI:
+      break;
+    case CLV:
+      break;
+    case SEC:
+      break;
+    case SED:
+      break;
+    case SEI:
+      printf("\tSEI\n");
+      cpu_reg.P.sts_bits.interrupt = true;
+      break;
+    case BRK:
+      break;
+    case NOP:
+      break;
+    default:
+      break;
+  }
+
 }
 
 uint8_t Cpu::getStatusReg(){
